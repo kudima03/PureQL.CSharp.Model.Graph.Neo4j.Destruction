@@ -20,16 +20,20 @@ CI additionally passes `-p:AssemblyVersion` (pinned to the major) and `-p:FileVe
 
 ## Architecture
 
-This is the **Destruction package** of the `PureQL.CSharp.Model.Graph` family: it drops the constraint and the indexes that `PureQL.CSharp.Model.Graph.Neo4j.Creation` creates. It depends on `PureQL.CSharp.Model.Graph` `0.1.0-preview.1.0.0`, `PureQL.CSharp.Model.Graph.Neo4j.Abstractions` `0.1.0-preview.1.0.0` and `Neo4j.Driver` `6.5.1`, and on no other operation package. Namespace `PureQL.CSharp.Model.Graph.Neo4j.Destruction`, one public type per file:
+This is the **Destruction package** of the `PureQL.CSharp.Model.Graph` family: it deletes every stored query graph and drops the constraint and the indexes that `PureQL.CSharp.Model.Graph.Neo4j.Creation` creates. It depends on `PureQL.CSharp.Model.Graph` `0.1.0-preview.1.0.0`, `PureQL.CSharp.Model.Graph.Neo4j.Abstractions` `0.1.0-preview.1.0.0` and `Neo4j.Driver` `6.5.1`, and on no other operation package. Namespace `PureQL.CSharp.Model.Graph.Neo4j.Destruction`, one public type per file:
 
 - `SchemaNames` — the constant names of the constraint (`pureql_query_id`) and the indexes (`pureql_node_query_id`, `pureql_node_field_source`, `pureql_node_param`). They duplicate the Creation package's names and must match them.
 - `SchemaDestructionStatements` — `sealed record : IEnumerable<Neo4j.Driver.Query>`: `DROP CONSTRAINT … IF EXISTS`, then `DROP INDEX … IF EXISTS` for each index.
+- `DroppedSchema(IAsyncQueryRunner Runner)` — `ApplyAsync(ct)` repeats the internal `NodeBatchDeletionStatement` (`MATCH (n:Node) WITH n LIMIT $batch DETACH DELETE n RETURN count(n) AS deleted`) until it returns 0, then runs `SchemaDestructionStatements`. `BatchSize` (10000) is public; an internal constructor takes another size for tests. Neo4j refuses schema statements in an explicit transaction that wrote data, so it is meant for a session, where each statement is auto-commit.
+- `DroppedSchemaOf(INeo4jStoredQueries Store)` — opens a write session on `Store.Driver` for `Store.Database` and runs `DroppedSchema` on it. Not atomic: a failed or cancelled run leaves what it already deleted deleted.
+
+Only `:Node` nodes are deleted: every node of a query graph has that label, and other nodes (such as Migration's version marker) and other schema objects stay.
 
 Inside the `PureQL.CSharp.Model` namespace tree, `Query` names the model's subquery union, so code here aliases the driver type (`using DriverQuery = Neo4j.Driver.Query;`).
 
 The public API is the shared contract of the family: do not rename or reshape it. Every public member has XML documentation (`GenerateDocumentationFile`; a missing comment fails the build under `-warnaserror`).
 
-**Test project:** `PureQL.CSharp.Model.Graph.Neo4j.Destruction.Tests` targets `net11.0` and uses xunit with coverlet; unit tests check the names and the statements.
+**Test project:** `PureQL.CSharp.Model.Graph.Neo4j.Destruction.Tests` targets `net11.0` and uses xunit with coverlet; unit tests check the names and the statements; integration tests start `neo4j:5-community` through Testcontainers.Neo4j (no fixed ports, one container shared by the `SharedNeo4j` collection, so tests run one at a time). `SeededDatabase` creates Creation's schema with its four statements plus an unrelated index, writes sample queries of `PureQL.CSharp.Model.Samples` with `QueryGraphs.Of` and a test-only UNWIND insert (`InsertedGraph`, duplicated from Insertion), and adds a non-`:Node` marker node. Docker is required to run them.
 
 **Target framework:** net11.0 only, as the model. `IsAotCompatible` is `true`.
 

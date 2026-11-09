@@ -1,19 +1,29 @@
-# Pure.Template
+# PureQL.CSharp.Model.Graph.Neo4j.Destruction
 
-Project template for new **Pure** ecosystem NuGet libraries.
+Drops the Neo4j schema and every stored query graph of the **PureQL** graph storage packages.
 
+[![.NET build & test](https://github.com/kudima03/PureQL.CSharp.Model.Graph.Neo4j.Destruction/actions/workflows/build-and-test.yml/badge.svg?branch=main)](https://github.com/kudima03/PureQL.CSharp.Model.Graph.Neo4j.Destruction/actions/workflows/build-and-test.yml)
+[![Build and Deploy](https://github.com/kudima03/PureQL.CSharp.Model.Graph.Neo4j.Destruction/actions/workflows/publish-nuget.yml/badge.svg?branch=main)](https://github.com/kudima03/PureQL.CSharp.Model.Graph.Neo4j.Destruction/actions/workflows/publish-nuget.yml)
+[![NuGet](https://img.shields.io/nuget/v/PureQL.CSharp.Model.Graph.Neo4j.Destruction)](https://www.nuget.org/packages/PureQL.CSharp.Model.Graph.Neo4j.Destruction)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Overview
 
-`Pure.Template` is the canonical starting point for new Pure ecosystem packages. It ships with a pre-configured project structure, `.editorconfig`, GitHub Actions workflows for build/test and NuGet publish, and standard `CODEOWNERS` and `CODE_OF_CONDUCT.md` files — so a new library can be bootstrapped consistently without manually copying configuration from another repo.
+`PureQL.CSharp.Model.Graph.Neo4j.Destruction` is the operation package of the `PureQL.CSharp.Model.Graph` family that undoes `PureQL.CSharp.Model.Graph.Neo4j.Creation`: it drops the constraint and the indexes Creation creates. Every statement is idempotent, so dropping a schema that does not exist is a no-op.
 
-## What's included
+## Public API
 
-| Item | Description |
+Namespace `PureQL.CSharp.Model.Graph.Neo4j.Destruction`:
+
+| Name | Description |
 |------|-------------|
-| `.editorconfig` | Shared code style rules for the Pure ecosystem |
-| `CODEOWNERS` | Default ownership configuration |
-| `CODE_OF_CONDUCT.md` | Contributor code of conduct |
-| `.github/workflows/build-and-test.yml` | CI workflow: restore, build, and test on every push |
-| `.github/workflows/publish-nuget.yml` | Publish workflow: triggered on git tag push |
+| `SchemaNames` | The constraint and index names Creation creates: `pureql_query_id`, `pureql_node_query_id`, `pureql_node_field_source`, `pureql_node_param` |
+| `SchemaDestructionStatements` | `IEnumerable<Neo4j.Driver.Query>`: `DROP CONSTRAINT pureql_query_id IF EXISTS`, then `DROP INDEX <name> IF EXISTS` for the three indexes |
+
+This package does not reference the Creation package: `SchemaNames` duplicates its names, which must match.
+
+## Installation
+
+```
+dotnet add package PureQL.CSharp.Model.Graph.Neo4j.Destruction
+```

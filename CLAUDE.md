@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-All `dotnet` commands must be run from the `./src` directory. The SDK is pinned by `global.json` (.NET 11, for the model's C# 15 unions); where the system SDK is older, use `~/.dotnet/dotnet` or put it first on `PATH` with `DOTNET_ROOT=$HOME/.dotnet`.
+All `dotnet` commands must be run from the `./src` directory. The projects need the .NET 11 SDK (for the model's C# 15 unions); where the system SDK is older, use `~/.dotnet/dotnet` or put it first on `PATH` with `DOTNET_ROOT=$HOME/.dotnet`.
 
 ```bash
 dotnet restore
@@ -20,7 +20,7 @@ CI additionally passes `-p:AssemblyVersion` (pinned to the major) and `-p:FileVe
 
 ## Architecture
 
-This is the **Destruction package** of the `PureQL.CSharp.Model.Graph` family: it deletes every stored query graph and drops the constraint and the indexes that `PureQL.CSharp.Model.Graph.Neo4j.Creation` creates. It depends on `PureQL.CSharp.Model.Graph` `0.1.0-preview.1.0.0`, `PureQL.CSharp.Model.Graph.Neo4j.Abstractions` `0.1.0-preview.1.0.0` and `Neo4j.Driver` `6.5.1`, and on no other operation package. Namespace `PureQL.CSharp.Model.Graph.Neo4j.Destruction`, one public type per file:
+This is the **Destruction package** of the `PureQL.CSharp.Model.Graph` family: it deletes every stored query graph and drops the constraint and the indexes that `PureQL.CSharp.Model.Graph.Neo4j.Creation` creates. It depends on `PureQL.CSharp.Model.Graph` `0.1.0-preview.1.1.0`, `PureQL.CSharp.Model.Graph.Neo4j.Abstractions` `0.1.0-preview.1.0.0` and `Neo4j.Driver` `6.5.1`, and on no other operation package. Namespace `PureQL.CSharp.Model.Graph.Neo4j.Destruction`, one public type per file:
 
 - `SchemaNames` — the constant names of the constraint (`pureql_query_id`) and the indexes (`pureql_node_query_id`, `pureql_node_field_source`, `pureql_node_param`). They duplicate the Creation package's names and must match them.
 - `SchemaDestructionStatements` — `sealed record : IEnumerable<Neo4j.Driver.Query>`: `DROP CONSTRAINT … IF EXISTS`, then `DROP INDEX … IF EXISTS` for each index.

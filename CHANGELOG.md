@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0-preview.0.2.0] - 2026-11-11
+
+### Changed
+
+- Depends on `PureQL.CSharp.Model.Graph` `0.1.0-preview.1.1.0` and
+  `PureQL.CSharp.Model.Graph.Neo4j.Abstractions` `0.1.0-preview.1.1.0`, the
+  .NET 11 releases.
+- Build and publish workflows install the .NET 11 SDK by version; the
+  `global.json` SDK pin is removed.
+
 ## [0.1.0-preview.0.1.0] - 2026-11-09
 
 First release: drops every stored PureQL query graph and the Neo4j schema that

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Tests use `PureQL.CSharp.Model.Samples` `0.1.0-preview.4.1.0` and a new
+  test stores all 386 of its samples (41,630 nodes, more than one batch) and
+  checks that dropping the schema leaves no node or relationship of any of
+  them. The package itself is unchanged.
+
 ## [0.1.0-preview.1.0.0] - 2026-11-25
 
 ### Changed

@@ -12,6 +12,14 @@ namespace PureQL.CSharp.Model.Graph.Neo4j.Destruction.Tests;
 /// The test database with the schema Creation creates and sample query graphs, next
 /// to a node and an index that belong to no query graph.
 /// </summary>
+/// <remarks>
+/// <see cref="SeedAsync()"/> writes a few samples of different shapes (joins, paging,
+/// subqueries, literals, grouping, inline rows, recursion): the tests of batching,
+/// cancellation, transactions and idempotence do not depend on the shape of a graph,
+/// and all 386 samples (41,630 nodes) would make each of them take seconds, and the
+/// batch-of-one test tens of thousands of statements. <see cref="EverySampleTests"/>
+/// seeds every sample once.
+/// </remarks>
 internal sealed record SeededDatabase(IDriver Driver)
 {
     public const string MarkerLabel = "PureQLModelVersion";
@@ -42,7 +50,16 @@ internal sealed record SeededDatabase(IDriver Driver)
             new DescendantsQuery().Value,
         ];
 
-    public async Task<long> SeedAsync()
+    public Task<long> SeedAsync()
+    {
+        return SeedAsync(Queries);
+    }
+
+    /// <summary>
+    /// Empties the database, creates the schema and the marker, and writes the graphs
+    /// of <paramref name="queries"/>; returns their number of nodes.
+    /// </summary>
+    public async Task<long> SeedAsync(IEnumerable<PureQLQuery> queries)
     {
         await EmptyAsync();
         await using IAsyncSession session = Driver.AsyncSession();
@@ -53,7 +70,7 @@ internal sealed record SeededDatabase(IDriver Driver)
         }
         IReadOnlyList<QueryGraph> graphs =
         [
-            .. Queries.Select(query => QueryGraphs.Of(query, Guid.NewGuid())),
+            .. queries.Select(query => QueryGraphs.Of(query, Guid.NewGuid())),
         ];
         await session.ExecuteWriteAsync(async runner =>
         {
@@ -87,6 +104,11 @@ internal sealed record SeededDatabase(IDriver Driver)
     public Task<long> QueryNodeCountAsync()
     {
         return ScalarAsync("MATCH (n:Node) RETURN count(n)");
+    }
+
+    public Task<long> NodeCountAsync()
+    {
+        return ScalarAsync("MATCH (n) RETURN count(n)");
     }
 
     public Task<long> RelationshipCountAsync()

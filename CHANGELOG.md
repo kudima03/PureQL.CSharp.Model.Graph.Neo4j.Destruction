@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0-preview.1.0.0] - 2026-11-25
+
 ### Changed
 
 - **Breaking:** depends on `PureQL.CSharp.Model.Graph` `0.1.0-preview.2.0.0`

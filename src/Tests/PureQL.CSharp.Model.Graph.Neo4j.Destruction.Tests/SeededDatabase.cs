@@ -2,6 +2,7 @@ using Neo4j.Driver;
 using PureQL.CSharp.Model.Samples.Queries.GroupBy;
 using PureQL.CSharp.Model.Samples.Queries.Joins;
 using PureQL.CSharp.Model.Samples.Queries.Pagination;
+using PureQL.CSharp.Model.Samples.Queries.Recursive;
 using PureQL.CSharp.Model.Samples.Queries.Select;
 using PureQL.CSharp.Model.Samples.Queries.Subqueries;
 
@@ -37,6 +38,8 @@ internal sealed record SeededDatabase(IDriver Driver)
             new SubqueryPipelineQuery().Value,
             new LiteralOfEveryTypeNextToFieldQuery().Value,
             new GroupByCountQuery().Value,
+            new InlineStatusRowsQuery().Value,
+            new DescendantsQuery().Value,
         ];
 
     public async Task<long> SeedAsync()
